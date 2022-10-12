@@ -132,7 +132,7 @@ AUTH_USER_MODEL = "users.User"
 DJOSER = {
     'SEND_ACTIVATION_EMAIL': False,
     'LOGIN_FIELD': 'email',
-    'users': 'djoser.permissions.AllowAny',
+    "PERMISSIONS": {"user_list": ["rest_framework.permissions.AllowAny"]},
 }
 
 REST_FRAMEWORK = {
