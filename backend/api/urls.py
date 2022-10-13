@@ -1,8 +1,8 @@
-from django.contrib import admin
-from django.urls import path, include, re_path
+# from django.contrib import admin
+# from django.urls import path, include, re_path
 
 
-urlpatterns = [
-    path('', include('djoser.urls')),
-    re_path(r'auth/', include('djoser.urls.authtoken')),
-]
+# urlpatterns = [
+#     path('', include('djoser.urls')),
+#     re_path(r'auth/', include('djoser.urls.authtoken')),
+# ]
