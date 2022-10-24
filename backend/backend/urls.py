@@ -15,10 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.routers import SimpleRouter
+from api.views import TagViewSet
+
+router = SimpleRouter() 
+router.register('tags', TagViewSet, basename="tag") 
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('djoser.urls')),
+    path('api/', include(router.urls)),
     path('api/auth/', include('djoser.urls.authtoken'))
 ]
