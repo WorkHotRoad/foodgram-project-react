@@ -1,6 +1,6 @@
 # import webcolors
 from rest_framework import serializers
-from .models import Tag
+from .models import Tag, Ingredients
 
 
 # class Hex2NameColor(serializers.Field):
@@ -22,3 +22,10 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
+
+
+class IngredientsSerializer(serializers.ModelSerializer):
+    # color = Hex2NameColor()
+    class Meta:
+        model = Ingredients
+        fields = ('id', 'name', 'measurement_unit')

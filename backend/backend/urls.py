@@ -15,11 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.routers import SimpleRouter
-from api.views import TagViewSet
+from rest_framework.routers import DefaultRouter
+from recipe.views import TagViewSet, IngredientsViewSet
 
-router = SimpleRouter() 
-router.register('tags', TagViewSet, basename="tag") 
+
+router = DefaultRouter()
+router.register(r'tags', TagViewSet, basename="tag") 
+router.register(r'ingredients', IngredientsViewSet, basename="ingredients") 
 
 
 urlpatterns = [

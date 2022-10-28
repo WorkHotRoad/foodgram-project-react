@@ -1,9 +1,10 @@
 from django.contrib import admin
 
 from users.models import User
-from .models import Tag
+from recipe.models import Tag
+from recipe.models import Ingredients
 
-
+@admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = (
         "username",
@@ -15,6 +16,7 @@ class UserAdmin(admin.ModelAdmin):
     list_editable = ("password",)
 
 
+@admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = (
         "id",
@@ -25,5 +27,11 @@ class TagAdmin(admin.ModelAdmin):
     list_editable = ("name", "color", "slug",)
 
 
-admin.site.register(User, UserAdmin)
-admin.site.register(Tag, TagAdmin)
+@admin.register(Ingredients)
+class IngredientsAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "name",
+        "measurement_unit",
+    )
+    list_editable = ("name", "measurement_unit",)
