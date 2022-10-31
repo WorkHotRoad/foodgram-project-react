@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from users.models import User
-from recipe.models import Tag ,Ingredients
+from recipe.models import Tag, Ingredients, Recipe
 
 
 @admin.register(User)
@@ -35,3 +35,28 @@ class IngredientsAdmin(admin.ModelAdmin):
         "measurement_unit",
     )
     list_editable = ("name", "measurement_unit",)
+
+
+
+
+@admin.register(Recipe)
+class RecipeAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "author",
+        "name",
+        "text",
+        "cooking_time",
+        "image",
+        'get_ingredients',
+        'get_tags'
+    )
+
+    def get_ingredients(self, obj):
+        return "\n".join([str(p) for p in obj.ingredients.all()])
+
+    def get_tags(self, obj):
+        return ", ".join([str(p) for p in obj.tags.all()])
+
+    get_ingredients.short_description = "Ингредиенты"
+    get_tags.short_description = "Tags"

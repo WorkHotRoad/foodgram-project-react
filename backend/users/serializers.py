@@ -7,6 +7,6 @@ class UserRegistrationSerializer(UserCreateSerializer):
         read_only_fields = ('id', )
 
 
-class UserList(UserCreateSerializer):
+class UserSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         fields = ('email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed',)

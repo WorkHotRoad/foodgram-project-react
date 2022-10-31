@@ -1,3 +1,4 @@
+import os
 """
 Django settings for backend project.
 
@@ -123,6 +124,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
@@ -138,8 +142,8 @@ DJOSER = {
         "user" : ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
     },
     'SERIALIZERS': {"user_create": "users.serializers.UserRegistrationSerializer",
-        "user": "users.serializers.UserList",
-        'current_user': "users.serializers.UserList",
+        "user": "users.serializers.UserSerializer",
+        'current_user': "users.serializers.UserSerializer",
     },
 }
 
