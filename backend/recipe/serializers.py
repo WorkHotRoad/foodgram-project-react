@@ -1,5 +1,6 @@
+from requests import request
 from rest_framework import serializers, status
-from .models import Tag, Ingredients, Recipe, IngredientAmount
+from .models import Tag, Ingredients, Recipe, IngredientAmount, Favorite
 from users.serializers import UserSerializer
 from rest_framework.validators import UniqueTogetherValidator
 from drf_extra_fields.fields import Base64ImageField
@@ -37,6 +38,12 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
         ]
 
 
+class FavoritRecipeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     ingredients = IngredientAmountSerializer(
@@ -46,6 +53,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
     author = UserSerializer(read_only=True)
     image = Base64ImageField()
+    is_favorited = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -57,8 +65,15 @@ class RecipeSerializer(serializers.ModelSerializer):
             'name',
             'image',
             'text',
-            'cooking_time'
+            'cooking_time',
+            'is_favorited'
         )
+
+    def get_is_favorited(self, obj):
+        user = self.context["request"].user
+        if user.is_authenticated:
+            return Favorite.objects.filter(author=user, recipe_id=obj.id).exists()
+        return False
 
     def validate(self, data):
         ingredients = self.initial_data.get('ingredients')

@@ -127,6 +127,33 @@ class IngredientAmount(models.Model):
         verbose_name_plural = 'Ингредиенты рецептов'
 
 
+class Favorite(models.Model):
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Пользователь",
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        related_name='favorites',
+        on_delete=models.CASCADE,
+        verbose_name="рецепт"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["author", "recipe"], name="favorite_unique_recipe"
+            )
+        ]
+        ordering = ['-id']
+        verbose_name = 'Избранный рецепт'
+        verbose_name_plural = 'Избранные рецепты'
+
+
+
+
+
 
 
 
