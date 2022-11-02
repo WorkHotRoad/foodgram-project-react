@@ -4,7 +4,6 @@ from users.models import User
 from django.core.validators import MinValueValidator
 
 
-
 CHOICES = (
     ('#000000', 'черный'),
     ('#808080', 'серый'),
@@ -18,8 +17,12 @@ CHOICES = (
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=200, verbose_name="Название тэга")
-    color = models.CharField(max_length=7, choices=CHOICES, verbose_name="Цвет в HEX")
+    name = models.CharField(
+        max_length=200, verbose_name="Название тэга"
+    )
+    color = models.CharField(
+        max_length=7, choices=CHOICES, verbose_name="Цвет в HEX"
+    )
     slug = models.CharField(
         max_length=200,
         unique=True,
@@ -37,8 +40,12 @@ class Tag(models.Model):
 
 
 class Ingredients(models.Model):
-    name = models.CharField(max_length=200, verbose_name="Название ингредиента")
-    measurement_unit = models.CharField(max_length=200, verbose_name="Единица измерения")
+    name = models.CharField(
+        max_length=200, verbose_name="Название ингредиента"
+    )
+    measurement_unit = models.CharField(
+        max_length=200, verbose_name="Единица измерения"
+    )
 
     def __str__(self):
         return self.name
@@ -96,7 +103,6 @@ class Recipe(models.Model):
          ordering = ['-id']
          verbose_name = 'Рецепт'
          verbose_name_plural = 'Рецепты'
-
 
 
 class IngredientAmount(models.Model):

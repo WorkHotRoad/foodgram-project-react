@@ -1,11 +1,11 @@
-from requests import request
 from .models import Tag, Ingredients, Recipe, Favorite
 from .permissions import IsAdminOrReadOnly, IsAdminOwnerOrReadOnly
 from rest_framework.response import Response
-from .serializers import TagSerializer, IngredientsSerializer, RecipeSerializer, FavoritRecipeSerializer
+from .serializers import TagSerializer, IngredientsSerializer, RecipeSerializer
+from users.serializers import FavoritRecipeSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, permissions, status, viewsets
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -32,8 +32,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=['post', 'delete'],
-            permission_classes=(permissions.IsAuthenticated,))
+
+    @action(
+        detail=True, methods=['post', 'delete'],
+        permission_classes=(permissions.IsAuthenticated,)
+    )
     def favorite(self, request, pk=None,):
         customer = self.request.user
         if request.method == 'POST':

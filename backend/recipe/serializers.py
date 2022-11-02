@@ -38,12 +38,6 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
         ]
 
 
-class FavoritRecipeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
-
-
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     ingredients = IngredientAmountSerializer(
