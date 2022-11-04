@@ -1,7 +1,6 @@
 from django.db import models
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator
 from users.models import User
-from django.core.validators import MinValueValidator
 
 
 CHOICES = (
@@ -87,7 +86,7 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         upload_to='images_recipe',
-        verbose_name="Фотография"
+        verbose_name="Картинка рецепта"
     )
     ingredients = models.ManyToManyField(
         Ingredients,
