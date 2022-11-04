@@ -180,6 +180,7 @@ class ShoppingCart(models.Model):
     class Meta:
         ordering = ['-id']
         verbose_name = 'Рецепты для покупки'
+        verbose_name_plural = 'Рецепты для покупок'
         constraints = [
             models.UniqueConstraint(
                 fields=['author', 'recipe'], name='unique shopping_list')
