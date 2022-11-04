@@ -1,4 +1,4 @@
-from .models import Tag, Ingredients, Recipe, Favorite
+from .models import Tag, Ingredients, Recipe, Favorite, ShoppingCart, IngredientAmount
 from .permissions import IsAdminOrReadOnly, IsAdminOwnerOrReadOnly
 from rest_framework.response import Response
 from .serializers import TagSerializer, IngredientsSerializer, RecipeSerializer
@@ -6,14 +6,16 @@ from users.serializers import FavoritRecipeSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
+from django.db.models import Sum
+from django.http import HttpResponse
+from prettytable import PrettyTable
+from .filters import RecipeFilter
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('name',)
 
 
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -21,17 +23,29 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientsSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter, )
-    search_fields = ('name',)
+    search_fields = ('^name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all().order_by('-id')
     serializer_class = RecipeSerializer
     permission_classes = [IsAdminOwnerOrReadOnly]
+    filter_class = RecipeFilter
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    @action(
+        detail=True, methods=['post', 'delete'],
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def shopping_cart(self, request, pk=None):
+        customer = self.request.user
+        tag = "покупок"
+        if request.method == 'POST':
+            return self.func_add_object(ShoppingCart, customer, tag, pk)
+        else:
+            return self.func_delete_object(ShoppingCart, customer, tag, pk)
 
     @action(
         detail=True, methods=['post', 'delete'],
@@ -39,22 +53,69 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def favorite(self, request, pk=None,):
         customer = self.request.user
+        tag = "избранного"
         if request.method == 'POST':
-            if Favorite.objects.filter(author=customer, recipe__id=pk).exists():
-                return Response({
-                    'errors': 'Рецепт уже в избранном'
-                }, status=status.HTTP_400_BAD_REQUEST)
-            recipe = get_object_or_404(Recipe, id=pk)
-            Favorite.objects.create(author=customer, recipe=recipe)
-            serializer = FavoritRecipeSerializer(recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return self.func_add_object(Favorite, customer, tag, pk)
         else:
-            obj = Favorite.objects.filter(author=customer, recipe__id=pk)
-            if obj.exists():
-                obj.delete()
-                return Response({
-                    'Рецепт удален из избранного'
-                },status=status.HTTP_204_NO_CONTENT)
-            return Response({
-                'errors': 'Рецепт уже удален'
+            return self.func_delete_object(Favorite, customer, tag, pk)
+    
+    @action(detail=False, methods=['get'],
+            permission_classes=[permissions.IsAuthenticated])
+    def download_shopping_cart(self, request):
+        user =  request.user
+        recipe_query = ShoppingCart.objects.filter(
+            author = user
+        ).values('recipe__name')
+        if len(recipe_query):
+            recipe_list = ", ".join(
+                [values for i in recipe_query for keys, values in i.items()]
+            )
+            ingredients = IngredientAmount.objects.filter(
+                recipe__Shopping_list__author=user).values(
+                'ingredient__name',
+                'ingredient__measurement_unit').annotate(total=Sum('amount'))
+
+            shopping_body = [values for i in ingredients for keys, values in i.items()]
+            shopping_head = ['Продукт', 'Ед.измерения', 'Кол-во']
+            columns = len(shopping_head)
+            table = PrettyTable(shopping_head)
+            while shopping_body:
+                columns = len(shopping_head)
+                table.add_row(shopping_body[:columns])
+                shopping_body = shopping_body[columns:]
+            file =(
+                f"Вот что вам нужно купить для выбранных рецептов\n"
+                f"Рецепты: {recipe_list}\n\n"
+            )
+            file += str(table)
+            filename = "shopping_list.txt"
+            response = HttpResponse(file, content_type='text/plain')
+            response['Content-Disposition'] = f'attachment; filename={filename}'
+
+            return response 
+        return Response({
+                f'errors': f'Нет рецептов в списке'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def func_add_object(self, model, user, tag, pk):
+        if model.objects.filter(author=user, recipe__id=pk).exists():
+            return Response({
+                f'errors': f'Рецепт уже в списке {tag}'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        recipe = get_object_or_404(Recipe, id=pk)
+        model.objects.create(author=user, recipe=recipe)
+        serializer = FavoritRecipeSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+    def func_delete_object(self, model, user, tag, pk):
+        obj = model.objects.filter(author=user, recipe__id=pk)
+        if obj.exists():
+            obj.delete()
+            return Response({
+                f'Рецепт удален из списка {tag}'
+            },status=status.HTTP_204_NO_CONTENT)
+        return Response({
+            'errors': 'Рецепт уже удален'
+        }, status=status.HTTP_400_BAD_REQUEST)

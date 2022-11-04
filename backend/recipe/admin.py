@@ -10,6 +10,7 @@ class TagAdmin(admin.ModelAdmin):
         "slug",
     )
     list_editable = ("name", "color", "slug",)
+    search_fields = ('name', 'slug', )
 
 
 @admin.register(Ingredients)
@@ -20,6 +21,7 @@ class IngredientsAdmin(admin.ModelAdmin):
         "measurement_unit",
     )
     list_editable = ("name", "measurement_unit",)
+    search_fields = ('name', )
 
 
 @admin.register(Recipe)
