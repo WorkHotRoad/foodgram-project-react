@@ -1,13 +1,12 @@
-from requests import request
-from rest_framework import serializers
-from .models import (
-    Tag, Ingredients, Recipe,
-    IngredientAmount, Favorite, ShoppingCart
-)
-from users.serializers import UserSerializer
-from rest_framework.validators import UniqueTogetherValidator
-from drf_extra_fields.fields import Base64ImageField
 from django.shortcuts import get_object_or_404
+from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
+
+from users.serializers import UserSerializer
+
+from .models import (Favorite, IngredientAmount, Ingredients, Recipe,
+                     ShoppingCart, Tag)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -64,19 +63,25 @@ class RecipeSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
             'is_favorited',
-            'is_in_shopping_cart' 
+            'is_in_shopping_cart'
         )
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context["request"].user
         if user.is_authenticated:
-            return ShoppingCart.objects.filter(author=user, recipe_id=obj.id).exists()
+            return (
+                ShoppingCart.objects.filter(
+                    author=user, recipe_id=obj.id
+                ).exists()
+            )
         return False
 
     def get_is_favorited(self, obj):
         user = self.context["request"].user
         if user.is_authenticated:
-            return Favorite.objects.filter(author=user, recipe_id=obj.id).exists()
+            return Favorite.objects.filter(
+                author=user, recipe_id=obj.id
+            ).exists()
         return False
 
     def validate(self, data):
@@ -120,7 +125,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         recipe.tags.set(tags_data)
         self.create_ingredients(ingredients_data, recipe)
         return recipe
-    
+
     def update(self, instance, validated_data):
         instance.image = validated_data.get('image', instance.image)
         instance.name = validated_data.get('name', instance.name)

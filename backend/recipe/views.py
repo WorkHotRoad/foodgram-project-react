@@ -1,15 +1,18 @@
-from .models import Tag, Ingredients, Recipe, Favorite, ShoppingCart, IngredientAmount
-from .permissions import IsAdminOrReadOnly, IsAdminOwnerOrReadOnly
-from rest_framework.response import Response
-from .serializers import TagSerializer, IngredientsSerializer, RecipeSerializer
-from users.serializers import FavoritRecipeSerializer
-from django.shortcuts import get_object_or_404
-from rest_framework import filters, permissions, status, viewsets
-from rest_framework.decorators import action
 from django.db.models import Sum
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from prettytable import PrettyTable
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from users.serializers import FavoritRecipeSerializer
+
 from .filters import RecipeFilter
+from .models import (Favorite, IngredientAmount, Ingredients, Recipe,
+                     ShoppingCart, Tag)
+from .permissions import IsAdminOrReadOnly, IsAdminOwnerOrReadOnly
+from .serializers import IngredientsSerializer, RecipeSerializer, TagSerializer
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -58,13 +61,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return self.func_add_object(Favorite, customer, tag, pk)
         else:
             return self.func_delete_object(Favorite, customer, tag, pk)
-    
+
     @action(detail=False, methods=['get'],
             permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):
-        user =  request.user
+        user = request.user
         recipe_query = ShoppingCart.objects.filter(
-            author = user
+            author=user
         ).values('recipe__name')
         if len(recipe_query):
             recipe_list = ", ".join(
@@ -75,7 +78,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 'ingredient__name',
                 'ingredient__measurement_unit').annotate(total=Sum('amount'))
 
-            shopping_body = [values for i in ingredients for keys, values in i.items()]
+            shopping_body = [
+                values for i in ingredients for keys, values in i.items()
+            ]
             shopping_head = ['Продукт', 'Ед.измерения', 'Кол-во']
             columns = len(shopping_head)
             table = PrettyTable(shopping_head)
@@ -83,31 +88,31 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 columns = len(shopping_head)
                 table.add_row(shopping_body[:columns])
                 shopping_body = shopping_body[columns:]
-            file =(
+            file = (
                 f"Вот что вам нужно купить для выбранных рецептов\n"
                 f"Рецепты: {recipe_list}\n\n"
             )
             file += str(table)
             filename = "shopping_list.txt"
             response = HttpResponse(file, content_type='text/plain')
-            response['Content-Disposition'] = f'attachment; filename={filename}'
+            response[
+                'Content-Disposition'
+            ] = f'attachment; filename={filename}'
 
-            return response 
+            return response
         return Response({
-                f'errors': f'Нет рецептов в списке'
+                'errors': 'Нет рецептов в списке'
             }, status=status.HTTP_400_BAD_REQUEST)
-
 
     def func_add_object(self, model, user, tag, pk):
         if model.objects.filter(author=user, recipe__id=pk).exists():
             return Response({
-                f'errors': f'Рецепт уже в списке {tag}'
+                'errors': f'Рецепт уже в списке {tag}'
             }, status=status.HTTP_400_BAD_REQUEST)
         recipe = get_object_or_404(Recipe, id=pk)
         model.objects.create(author=user, recipe=recipe)
         serializer = FavoritRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
     def func_delete_object(self, model, user, tag, pk):
         obj = model.objects.filter(author=user, recipe__id=pk)
@@ -115,7 +120,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             obj.delete()
             return Response({
                 f'Рецепт удален из списка {tag}'
-            },status=status.HTTP_204_NO_CONTENT)
+            }, status=status.HTTP_204_NO_CONTENT)
         return Response({
             'errors': 'Рецепт уже удален'
         }, status=status.HTTP_400_BAD_REQUEST)

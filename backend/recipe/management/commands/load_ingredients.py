@@ -10,6 +10,7 @@ from recipe.models import Ingredients
 files_dir = os.path.join(settings.BASE_DIR, "..", "data")
 file_path = os.path.join(files_dir, 'ingredients.json')
 
+
 class Command(BaseCommand):
     help = 'loading ingredients from data in json'
 
@@ -19,13 +20,18 @@ class Command(BaseCommand):
                 data = json.load(f)
                 for ingredient in data:
                     try:
-                        Ingredients.objects.create(name=ingredient["name"],
-                                                measurement_unit=ingredient[
-                                                    "measurement_unit"])
+                        Ingredients.objects.create(
+                            name=ingredient["name"],
+                            measurement_unit=ingredient[
+                                "measurement_unit"
+                            ]
+                        )
                     except IntegrityError:
-                        print(f'Ингридиет {ingredient["name"]} '
+                        print(
+                            f'Ингридиет {ingredient["name"]} '
                             f'{ingredient["measurement_unit"]} '
-                            f'уже есть в базе')
+                            f'уже есть в базе'
+                        )
 
         except FileNotFoundError:
             raise CommandError('Файл отсутствует в директории data')

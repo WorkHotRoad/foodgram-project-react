@@ -1,17 +1,19 @@
 from django.contrib.auth.models import AbstractUser
-from django.db import models
-from .validators import validate_username
 from django.core.validators import RegexValidator
+from django.db import models
+
+from .validators import validate_username
 
 
 class User(AbstractUser):
     username = models.CharField(
-        max_length=150, unique=True, 
+        max_length=150, unique=True,
         validators=[
-            RegexValidator(r'^[\w.@+-]+\Z',
-            message="Имя может собержать только буквы,"
-                    "цыфры и знаки:'.', '@', '+', '-'"
-            ),validate_username
+            RegexValidator(
+                r'^[\w.@+-]+\Z',
+                message="Имя может собержать только буквы,"
+                "цыфры и знаки:'.', '@', '+', '-'"
+            ), validate_username
         ]
     )
     email = models.EmailField(max_length=254, unique=True)

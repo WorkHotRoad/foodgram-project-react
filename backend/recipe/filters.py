@@ -1,11 +1,11 @@
-from django_filters.rest_framework import (
-    AllValuesMultipleFilter,
-    BooleanFilter,
-    ModelChoiceFilter,
-    FilterSet
-)
-from .models import Recipe
+from django_filters.rest_framework import (AllValuesMultipleFilter,
+                                           BooleanFilter, FilterSet,
+                                           ModelChoiceFilter)
+
 from users.models import User
+
+from .models import Recipe
+
 
 class RecipeFilter(FilterSet):
     is_favorited = BooleanFilter(method='get_is_favorited')

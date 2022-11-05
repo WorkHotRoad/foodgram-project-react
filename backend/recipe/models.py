@@ -1,7 +1,7 @@
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
-from django.core.validators import RegexValidator, MinValueValidator
-from users.models import User
 
+from users.models import User
 
 CHOICES = (
     ('#000000', 'черный'),
@@ -12,7 +12,7 @@ CHOICES = (
     ('#FFFF00', 'желтый'),
     ('#A52A2A', 'коричневый'),
     ('#FFFFFF', 'белый'),
-    )
+)
 
 
 class Tag(models.Model):
@@ -60,7 +60,7 @@ class Ingredients(models.Model):
             )
         ]
         ordering = ["name"]
-        verbose_name ='Ингридиент'
+        verbose_name = 'Ингридиент'
         verbose_name_plural = 'Ингридиенты'
 
 
@@ -103,10 +103,9 @@ class Recipe(models.Model):
         return self.name
 
     class Meta:
-
-         ordering = ['-id']
-         verbose_name = 'Рецепт'
-         verbose_name_plural = 'Рецепты'
+        ordering = ['-id']
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
 
 
 class IngredientAmount(models.Model):
@@ -131,7 +130,8 @@ class IngredientAmount(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["ingredient", "recipe"], name="unique ingredients_recipe"
+                fields=["ingredient", "recipe"],
+                name="unique ingredients_recipe"
             )
         ]
         verbose_name = 'Ингредиент рецепта'
@@ -175,7 +175,7 @@ class ShoppingCart(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Рецепт"
     )
-    
+
     class Meta:
         ordering = ['-id']
         verbose_name = 'Рецепты для покупки'
@@ -184,14 +184,3 @@ class ShoppingCart(models.Model):
             models.UniqueConstraint(
                 fields=['author', 'recipe'], name='unique shopping_list')
         ]
-
-
-
-
-
-
-
-
-
-
-

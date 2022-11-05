@@ -1,19 +1,19 @@
-from xml.dom.expatbuilder import parseFragmentString
-from .models import User, Follow
 from djoser.views import UserViewSet
-from rest_framework.decorators import action
 from rest_framework import permissions, status
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from .serializers import FollowSerializer
+
+from .models import Follow, User
 from .pagination import CustomPagination
+from .serializers import FollowSerializer
 
 
 class FollowUserViewSet(UserViewSet):
     pagination_class = CustomPagination
 
     @action(
-        detail=True, permission_classes=[permissions.IsAuthenticated], 
+        detail=True, permission_classes=[permissions.IsAuthenticated],
         methods=['post', 'delete']
     )
     def subscribe(self, request, id=None):
@@ -34,7 +34,7 @@ class FollowUserViewSet(UserViewSet):
                 context={'request': request}
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if request.method == 'DELETE':
+        else:
             follow = Follow.objects.filter(user=user, following=following)
             if follow.exists():
                 follow.delete()
@@ -47,7 +47,7 @@ class FollowUserViewSet(UserViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
-        detail=False, permission_classes=[permissions.IsAuthenticated], 
+        detail=False, permission_classes=[permissions.IsAuthenticated],
         methods=['get']
     )
     def subscriptions(self, request):
