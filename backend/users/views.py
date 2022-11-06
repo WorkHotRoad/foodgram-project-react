@@ -34,7 +34,7 @@ class FollowUserViewSet(UserViewSet):
                 context={'request': request}
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
+        if request.method == 'DELETE':
             follow = Follow.objects.filter(user=user, following=following)
             if follow.exists():
                 follow.delete()
@@ -45,6 +45,7 @@ class FollowUserViewSet(UserViewSet):
             return Response({
                 'Вы уже отписались'
             }, status=status.HTTP_400_BAD_REQUEST)
+        return None
 
     @action(
         detail=False, permission_classes=[permissions.IsAuthenticated],

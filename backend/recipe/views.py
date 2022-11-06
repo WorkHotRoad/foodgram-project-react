@@ -5,7 +5,6 @@ from prettytable import PrettyTable
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
 from users.serializers import FavoritRecipeSerializer
 
 from .filters import RecipeFilter
@@ -47,8 +46,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         tag = "покупок"
         if request.method == 'POST':
             return self.func_add_object(ShoppingCart, customer, tag, pk)
-        else:
+        if request.method == 'DELETE':
             return self.func_delete_object(ShoppingCart, customer, tag, pk)
+        return None
 
     @action(
         detail=True, methods=['post', 'delete'],
@@ -59,8 +59,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         tag = "избранного"
         if request.method == 'POST':
             return self.func_add_object(Favorite, customer, tag, pk)
-        else:
+        if request.method == 'DELETE':
             return self.func_delete_object(Favorite, customer, tag, pk)
+        return None
 
     @action(detail=False, methods=['get'],
             permission_classes=[permissions.IsAuthenticated])
@@ -101,8 +102,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
             return response
         return Response({
-                'errors': 'Нет рецептов в списке'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            'errors': 'Нет рецептов в списке'},
+            status=status.HTTP_400_BAD_REQUEST)
 
     def func_add_object(self, model, user, tag, pk):
         if model.objects.filter(author=user, recipe__id=pk).exists():
