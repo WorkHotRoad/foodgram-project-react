@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import IntegrityError
 from recipe.models import Ingredients
 
-files_dir = os.path.join(settings.BASE_DIR, "..", "data")
+files_dir = os.path.join(settings.BASE_DIR, "data")
 file_path = os.path.join(files_dir, 'ingredients.json')
 
 
