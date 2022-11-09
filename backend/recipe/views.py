@@ -6,18 +6,24 @@ from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from users.serializers import FavoritRecipeSerializer
+from users.pagination import LimitPageNumberPagination
 
-from .filters import RecipeFilter
+
 from .models import (Favorite, IngredientAmount, Ingredients, Recipe,
                      ShoppingCart, Tag)
-from .permissions import IsAdminOrReadOnly, IsAdminOwnerOrReadOnly
+from users.models import Follow
+from .permissions import IsAdminOrReadOnly, OwnerOrReadOnly
 from .serializers import IngredientsSerializer, RecipeSerializer, TagSerializer
+
+
+
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (IsAdminOrReadOnly,)
+    pagination_class = None
 
 
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -26,16 +32,46 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter, )
     search_fields = ('^name',)
+    pagination_class = None
+
+    def get_queryset(self):
+        queryset = self.queryset
+        name = self.request.GET.get('name')
+        if name:
+            return Ingredients.objects.filter(name__istartswith=name)
+        return queryset
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all().order_by('-id')
+    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    permission_classes = [IsAdminOwnerOrReadOnly]
-    filter_class = RecipeFilter
+    permission_classes = [OwnerOrReadOnly]
+    pagination_class = LimitPageNumberPagination
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    def get_queryset(self):
+        queryset = self.queryset
+        tags = self.request.query_params.getlist('tags')
+        
+        queryset = queryset.filter(tags__slug__in=tags).distinct()
+
+        author = self.request.query_params.get('author')
+        if author:
+            queryset = queryset.filter(author=author)
+        
+        user = self.request.user
+        if user.is_authenticated:
+            is_favorited = self.request.GET.get('is_favorited')
+            is_in_shopping_cart = self.request.GET.get('is_in_shopping_cart')
+            if is_favorited:
+                queryset = Recipe.objects.filter(favorites__author=self.request.user)
+                return queryset
+            if is_in_shopping_cart:
+                queryset = Recipe.objects.filter(Shopping_list__author=self.request.user)
+                return queryset
+        return queryset
 
     @action(
         detail=True, methods=['post', 'delete'],

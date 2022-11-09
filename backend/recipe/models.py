@@ -140,6 +140,7 @@ class IngredientAmount(models.Model):
 class Favorite(models.Model):
     author = models.ForeignKey(
         User,
+        related_name='favorites',
         on_delete=models.CASCADE,
         verbose_name="Пользователь",
     )

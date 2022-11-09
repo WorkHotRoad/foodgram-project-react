@@ -5,13 +5,12 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from .models import Follow, User
-from .pagination import CustomPagination
+from .pagination import LimitPageNumberPagination
 from .serializers import FollowSerializer
 
 
 class FollowUserViewSet(UserViewSet):
-    pagination_class = CustomPagination
-
+    pagination_class = LimitPageNumberPagination
     @action(
         detail=True, permission_classes=[permissions.IsAuthenticated],
         methods=['post', 'delete']
