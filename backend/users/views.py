@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
+
 from .models import Follow, User
 from .pagination import LimitPageNumberPagination
 from .serializers import FollowSerializer
@@ -11,6 +12,7 @@ from .serializers import FollowSerializer
 
 class FollowUserViewSet(UserViewSet):
     pagination_class = LimitPageNumberPagination
+
     @action(
         detail=True, permission_classes=[permissions.IsAuthenticated],
         methods=['post', 'delete']
@@ -52,7 +54,12 @@ class FollowUserViewSet(UserViewSet):
     )
     def subscriptions(self, request):
         user = request.user
-        follow = Follow.objects.filter(user=user)
-        pages = self.paginate_queryset(follow)
-        serializer = FollowSerializer(pages, many=True)
+        queryset = Follow.objects.filter(user=user)
+        pages = self.paginate_queryset(queryset)
+        # pages = self.paginate_queryset(follow)
+        serializer = FollowSerializer(
+            pages,
+            many=True,
+            context={'request': request}
+        )
         return self.get_paginated_response(serializer.data)

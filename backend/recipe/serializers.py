@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
+
 from users.serializers import UserSerializer
 
 from .models import (Favorite, IngredientAmount, Ingredients, Recipe,
@@ -89,22 +90,26 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'ingredients': 'Рецепт не может быть без ингредиентов'})
         ingredient_list = []
-        for ingredient_item in ingredients:
+        for ingredient_it in ingredients:
             ingredient = get_object_or_404(
                 Ingredients,
-                id=ingredient_item['id']
+                id=ingredient_it['id']
             )
             if ingredient in ingredient_list:
                 raise serializers.ValidationError(
                     'В одном рецепте ингредиенты не могут повторяться'
                 )
             ingredient_list.append(ingredient)
-            if int(ingredient_item['amount']) < 0:
+            if int(ingredient_it['amount']) < 0:
                 raise serializers.ValidationError({
                     'ingredients': (
                         'Количество ингредиента не может быть меньше 0'
                     )
                 })
+            if str(ingredient_it).isalpha() or str(ingredient_it).isalnum():
+                raise serializers.ValidationError(
+                    'Колличество нужно указывать только в цифрах'
+                )
         data['ingredients'] = ingredients
         return data
 

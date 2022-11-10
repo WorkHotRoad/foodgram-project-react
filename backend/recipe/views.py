@@ -4,19 +4,15 @@ from django.shortcuts import get_object_or_404
 from prettytable import PrettyTable
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
-from users.serializers import FavoritRecipeSerializer
-from users.pagination import LimitPageNumberPagination
 
+from rest_framework.response import Response
+from users.pagination import LimitPageNumberPagination
+from users.serializers import FavoritRecipeSerializer
 
 from .models import (Favorite, IngredientAmount, Ingredients, Recipe,
                      ShoppingCart, Tag)
-from users.models import Follow
 from .permissions import IsAdminOrReadOnly, OwnerOrReadOnly
 from .serializers import IngredientsSerializer, RecipeSerializer, TagSerializer
-
-
-
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -35,15 +31,14 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
 
     def get_queryset(self):
-        queryset = self.queryset
         name = self.request.GET.get('name')
         if name:
             return Ingredients.objects.filter(name__istartswith=name)
-        return queryset
+        return self.queryset
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.all().order_by('-id')
     serializer_class = RecipeSerializer
     permission_classes = [OwnerOrReadOnly]
     pagination_class = LimitPageNumberPagination
@@ -53,24 +48,28 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = self.queryset
-        tags = self.request.query_params.getlist('tags')
-        
-        queryset = queryset.filter(tags__slug__in=tags).distinct()
+        tags = self.request.GET.getlist('tags')
+        if tags:
+            queryset = queryset.filter(
+                tags__slug__in=tags).distinct()
 
-        author = self.request.query_params.get('author')
+        author = self.request.GET.get('author')
         if author:
-            queryset = queryset.filter(author=author)
-        
+            queryset = queryset.filter(
+                author=author, tags__slug__in=tags
+            ).distinct()
         user = self.request.user
-        if user.is_authenticated:
-            is_favorited = self.request.GET.get('is_favorited')
-            is_in_shopping_cart = self.request.GET.get('is_in_shopping_cart')
-            if is_favorited:
-                queryset = Recipe.objects.filter(favorites__author=self.request.user)
-                return queryset
-            if is_in_shopping_cart:
-                queryset = Recipe.objects.filter(Shopping_list__author=self.request.user)
-                return queryset
+        if user.is_anonymous:
+            return queryset
+        is_favorited = self.request.GET.get("is_favorited")
+        is_in_shopping_cart = self.request.GET.get("is_in_shopping_cart")
+
+        if is_favorited:
+            return Recipe.objects.filter(
+                favorites__author=user, tags__slug__in=tags
+            ).distinct()
+        if is_in_shopping_cart:
+            return Recipe.objects.filter(Shopping_list__author=user)
         return queryset
 
     @action(
