@@ -2,7 +2,6 @@ from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-
 from users.serializers import UserSerializer
 
 from .models import (Favorite, IngredientAmount, Ingredients, Recipe,
@@ -114,12 +113,13 @@ class RecipeSerializer(serializers.ModelSerializer):
         return data
 
     def create_ingredients(self, ingredients, recipe):
-        for ingredient in ingredients:
-            IngredientAmount.objects.create(
+        IngredientAmount.objects.bulk_create(
+            [IngredientAmount(
                 recipe=recipe,
                 ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'),
-            )
+                amount=ingredient.get('amount')
+            ) for ingredient in ingredients]
+        )
 
     def create(self, validated_data):
         image = validated_data.pop('image')

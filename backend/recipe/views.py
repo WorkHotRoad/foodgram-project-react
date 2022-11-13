@@ -4,7 +4,6 @@ from django.shortcuts import get_object_or_404
 from prettytable import PrettyTable
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
-
 from rest_framework.response import Response
 from users.pagination import LimitPageNumberPagination
 from users.serializers import FavoritRecipeSerializer
@@ -46,6 +45,39 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    def make_shopping_cart(self):
+        user = self.request.user
+        recipe_query = ShoppingCart.objects.filter(
+            author=user
+        ).values('recipe__name')
+        file = ""
+        if len(recipe_query):
+            recipe_list = ", ".join(
+                [values for i in recipe_query for keys, values in i.items()]
+            )
+            ingredients = IngredientAmount.objects.filter(
+                recipe__Shopping_list__author=user).values(
+                'ingredient__name',
+                'ingredient__measurement_unit').annotate(total=Sum('amount'))
+
+            shopping_body = [
+                values for i in ingredients for keys, values in i.items()
+            ]
+            shopping_head = ['Продукт', 'Ед.измерения', 'Кол-во']
+            columns = len(shopping_head)
+            table = PrettyTable(shopping_head)
+            while shopping_body:
+                columns = len(shopping_head)
+                table.add_row(shopping_body[:columns])
+                shopping_body = shopping_body[columns:]
+            file = (
+                f"Вот что вам нужно купить для выбранных рецептов\n"
+                f"Рецепты: {recipe_list}\n\n"
+            )
+            file += str(table)
+            return file
+        return None
+
     def get_queryset(self):
         queryset = self.queryset
         tags = self.request.GET.getlist('tags')
@@ -80,9 +112,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         customer = self.request.user
         tag = "покупок"
         if request.method == 'POST':
-            return self.func_add_object(ShoppingCart, customer, tag, pk)
+            return self.add_object(ShoppingCart, customer, tag, pk)
         if request.method == 'DELETE':
-            return self.func_delete_object(ShoppingCart, customer, tag, pk)
+            return self.delete_object(ShoppingCart, customer, tag, pk)
         return None
 
     @action(
@@ -93,54 +125,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
         customer = self.request.user
         tag = "избранного"
         if request.method == 'POST':
-            return self.func_add_object(Favorite, customer, tag, pk)
+            return self.add_object(Favorite, customer, tag, pk)
         if request.method == 'DELETE':
-            return self.func_delete_object(Favorite, customer, tag, pk)
+            return self.delete_object(Favorite, customer, tag, pk)
         return None
 
     @action(detail=False, methods=['get'],
             permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):
-        user = request.user
-        recipe_query = ShoppingCart.objects.filter(
-            author=user
-        ).values('recipe__name')
-        if len(recipe_query):
-            recipe_list = ", ".join(
-                [values for i in recipe_query for keys, values in i.items()]
-            )
-            ingredients = IngredientAmount.objects.filter(
-                recipe__Shopping_list__author=user).values(
-                'ingredient__name',
-                'ingredient__measurement_unit').annotate(total=Sum('amount'))
-
-            shopping_body = [
-                values for i in ingredients for keys, values in i.items()
-            ]
-            shopping_head = ['Продукт', 'Ед.измерения', 'Кол-во']
-            columns = len(shopping_head)
-            table = PrettyTable(shopping_head)
-            while shopping_body:
-                columns = len(shopping_head)
-                table.add_row(shopping_body[:columns])
-                shopping_body = shopping_body[columns:]
-            file = (
-                f"Вот что вам нужно купить для выбранных рецептов\n"
-                f"Рецепты: {recipe_list}\n\n"
-            )
-            file += str(table)
+        file = self.make_shopping_cart()
+        if file:
             filename = "shopping_list.txt"
             response = HttpResponse(file, content_type='text/plain')
             response[
                 'Content-Disposition'
             ] = f'attachment; filename={filename}'
-
             return response
         return Response({
             'errors': 'Нет рецептов в списке'},
             status=status.HTTP_400_BAD_REQUEST)
 
-    def func_add_object(self, model, user, tag, pk):
+    def add_object(self, model, user, tag, pk):
         if model.objects.filter(author=user, recipe__id=pk).exists():
             return Response({
                 'errors': f'Рецепт уже в списке {tag}'
@@ -150,7 +155,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = FavoritRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def func_delete_object(self, model, user, tag, pk):
+    def delete_object(self, model, user, tag, pk):
         obj = model.objects.filter(author=user, recipe__id=pk)
         if obj.exists():
             obj.delete()

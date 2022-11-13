@@ -1,8 +1,7 @@
 
-from drf_extra_fields.fields import Base64ImageField
-
-from djoser.serializers import UserCreateSerializer
 from django.shortcuts import get_object_or_404
+from djoser.serializers import UserCreateSerializer
+from drf_extra_fields.fields import Base64ImageField
 from recipe.models import Recipe
 from rest_framework import serializers
 
@@ -84,7 +83,7 @@ class FollowSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"errors": 'Вы не можете подписаться на самого себя'}
             )
-        elif follow_exist:
+        if follow_exist:
             raise serializers.ValidationError({"errors": 'Вы уже подписаны'})
         return data
 
