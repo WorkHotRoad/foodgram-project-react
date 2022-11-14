@@ -19,7 +19,8 @@ class FollowUserViewSet(UserViewSet):
     def subscribe(self, request, id=None):
         following = get_object_or_404(User, id=id)
         serializer = FollowSerializer(
-            data={'user': request.user.id, 'following': id}
+            data={'user': request.user.id, 'following': id},
+            context={'request': request}
         )
         if request.method == 'POST':
             serializer.is_valid(raise_exception=True)
@@ -28,17 +29,16 @@ class FollowUserViewSet(UserViewSet):
                 following, context={'request': self.request}
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if request.method == 'DELETE':
-            follow = get_object_or_404(
-                Follow, user=request.user, following__id=id
-            )
-            follow.delete()
-            return Response(
-                f'ВЫ отписались от {follow.following}',
-                status=status.HTTP_204_NO_CONTENT
-            )
+
+        serializer.is_valid(raise_exception=True)
+        follow = get_object_or_404(
+            Follow, user=request.user, following__id=id
+        )
+        follow.delete()
         return Response(
-            status=status.HTTP_400_BAD_REQUEST)
+            f'ВЫ отписались от {follow.following}',
+            status=status.HTTP_204_NO_CONTENT
+        )
 
     @action(
         detail=False, permission_classes=[permissions.IsAuthenticated],

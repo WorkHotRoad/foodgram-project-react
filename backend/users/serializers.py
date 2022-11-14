@@ -76,15 +76,24 @@ class FollowSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = data['user']['id']
         following = data['following']['id']
+        request = self.context.get('request')
         follow_exist = Follow.objects.filter(
             user=user, following__id=following
         ).exists()
-        if user == following:
+        if request.method == 'POST':
+            if user == following:
+                raise serializers.ValidationError(
+                    {"errors": 'Вы не можете подписаться на самого себя'}
+                )
+            if follow_exist:
+                raise serializers.ValidationError(
+                    {"errors": 'Вы уже подписаны'}
+                )
+            return data
+        if not follow_exist:
             raise serializers.ValidationError(
-                {"errors": 'Вы не можете подписаться на самого себя'}
+                {"errors": 'Вы не были подписаны на автора'}
             )
-        if follow_exist:
-            raise serializers.ValidationError({"errors": 'Вы уже подписаны'})
         return data
 
     def create(self, validated_data):

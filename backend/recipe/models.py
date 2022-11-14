@@ -1,5 +1,7 @@
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
+from django.db.models import Sum
+from prettytable import PrettyTable
 from users.models import User
 
 CHOICES = (
@@ -184,3 +186,36 @@ class ShoppingCart(models.Model):
             models.UniqueConstraint(
                 fields=['author', 'recipe'], name='unique shopping_list')
         ]
+
+    @staticmethod
+    def make_shopping_cart(user):
+        recipe_query = ShoppingCart.objects.filter(
+            author=user
+        ).values('recipe__name')
+        file = ""
+        if len(recipe_query):
+            recipe_list = ", ".join(
+                [values for i in recipe_query for keys, values in i.items()]
+            )
+            ingredients = IngredientAmount.objects.filter(
+                recipe__Shopping_list__author=user).values(
+                'ingredient__name',
+                'ingredient__measurement_unit').annotate(total=Sum('amount'))
+
+            shopping_body = [
+                values for i in ingredients for keys, values in i.items()
+            ]
+            shopping_head = ['Продукт', 'Ед.измерения', 'Кол-во']
+            columns = len(shopping_head)
+            table = PrettyTable(shopping_head)
+            while shopping_body:
+                columns = len(shopping_head)
+                table.add_row(shopping_body[:columns])
+                shopping_body = shopping_body[columns:]
+            file = (
+                f"Вот что вам нужно купить для выбранных рецептов\n"
+                f"Рецепты: {recipe_list}\n\n"
+            )
+            file += str(table)
+            return file
+        return None

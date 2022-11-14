@@ -1,15 +1,12 @@
-from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from prettytable import PrettyTable
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from users.pagination import LimitPageNumberPagination
 from users.serializers import FavoritRecipeSerializer
 
-from .models import (Favorite, IngredientAmount, Ingredients, Recipe,
-                     ShoppingCart, Tag)
+from .models import Favorite, Ingredients, Recipe, ShoppingCart, Tag
 from .permissions import IsAdminOrReadOnly, OwnerOrReadOnly
 from .serializers import IngredientsSerializer, RecipeSerializer, TagSerializer
 
@@ -44,39 +41,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
-    def make_shopping_cart(self):
-        user = self.request.user
-        recipe_query = ShoppingCart.objects.filter(
-            author=user
-        ).values('recipe__name')
-        file = ""
-        if len(recipe_query):
-            recipe_list = ", ".join(
-                [values for i in recipe_query for keys, values in i.items()]
-            )
-            ingredients = IngredientAmount.objects.filter(
-                recipe__Shopping_list__author=user).values(
-                'ingredient__name',
-                'ingredient__measurement_unit').annotate(total=Sum('amount'))
-
-            shopping_body = [
-                values for i in ingredients for keys, values in i.items()
-            ]
-            shopping_head = ['Продукт', 'Ед.измерения', 'Кол-во']
-            columns = len(shopping_head)
-            table = PrettyTable(shopping_head)
-            while shopping_body:
-                columns = len(shopping_head)
-                table.add_row(shopping_body[:columns])
-                shopping_body = shopping_body[columns:]
-            file = (
-                f"Вот что вам нужно купить для выбранных рецептов\n"
-                f"Рецепты: {recipe_list}\n\n"
-            )
-            file += str(table)
-            return file
-        return None
 
     def get_queryset(self):
         queryset = self.queryset
@@ -133,7 +97,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'],
             permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):
-        file = self.make_shopping_cart()
+        file = ShoppingCart.make_shopping_cart(request.user)
         if file:
             filename = "shopping_list.txt"
             response = HttpResponse(file, content_type='text/plain')
