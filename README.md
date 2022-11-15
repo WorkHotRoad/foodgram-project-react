@@ -7,5 +7,5 @@
 ![Python](https://img.shields.io/badge/Python-464646?style=flat-square&logo=python&logoColor=ffdd54)
 ![Nginx](https://img.shields.io/badge/Nginx-464646??style=flat-square&logo=nginx&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-464646??style=flat-square&logo=docker&logoColor=white)
-![Gunicorn](https://img.shields.io/badge/Gunicorn-464646??style=flat-square&logo=gunicorn&logoColor=white)
+![Gunicorn](https://img.shields.io/badge/Gunicorn-464646??style=flat-square&logo=gunicorn&logoColor=red)
 ![Yandex.Cloud](https://img.shields.io/badge/-Yandex.Cloud-464646?style=flat-square&logo=Yandex.Cloud)
