@@ -9,3 +9,4 @@
 ![Docker](https://img.shields.io/badge/Docker-464646??style=flat-square&logo=docker&logoColor=red)
 ![Gunicorn](https://img.shields.io/badge/Gunicorn-464646??style=flat-square&logo=gunicorn&logoColor=red)
 ![Yandex.Cloud](https://img.shields.io/badge/-Yandex.Cloud-464646?style=flat-square&logo=Yandex.Cloud&logoColor=red)
+![Telegram](https://img.shields.io/badge/Telegram-464646?style=flat-square&logo=telegram&logoColor=red)
