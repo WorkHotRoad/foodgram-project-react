@@ -1,7 +1,7 @@
 # praktikum_new_diplom
 ![example workflow](https://github.com/WorkHotRoad/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)
 
-![PostgreSQL](https://img.shields.io/badge/-PostgreSQL-464646?style=flat-square&logo=PostgreSQL&logoColor=ff1709)
+![PostgreSQL](https://img.shields.io/badge/-PostgreSQL-464646?style=flat-square&logo=PostgreSQL&logoColor=red)
 ![Django](https://img.shields.io/badge/Django-464646?style=flat-square&logo=Django&logoColor=red)
 ![DjangoREST](https://img.shields.io/badge/DJANGO-REST-464646??style=flat-square&logo=django&logoColor=red&color=ff1709&labelColor=gray)
 ![Python](https://img.shields.io/badge/Python-464646?style=flat-square&logo=python&logoColor=red)
