@@ -7,27 +7,23 @@ services:
     env_file:
       - ./.env
   
-  web:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-    restart: always
-    volumes:
-      - static_value:/code/static/
-      - media_value:/code/media/ 
-    depends_on:
-      - db
-    env_file:
-      - ./.env
-
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: workhotroad/front_for_my_foodgram
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
       - db
+
+  web:
+    image: workhotroad/my_foodgram
+    restart: always
+    volumes:
+      - static_value:/code/static/
+      - media_value:/code/media/
+    depends_on:
+      - db
+    env_file:
+      - ./.env
 
 
   nginx:
