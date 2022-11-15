@@ -22,15 +22,14 @@ class FollowUserViewSet(UserViewSet):
             data={'user': request.user.id, 'following': id},
             context={'request': request}
         )
+        serializer.is_valid(raise_exception=True)
         if request.method == 'POST':
-            serializer.is_valid(raise_exception=True)
             serializer.save(user=request.user)
             serializer = ShowFollowsSerializer(
                 following, context={'request': self.request}
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        serializer.is_valid(raise_exception=True)
         follow = get_object_or_404(
             Follow, user=request.user, following__id=id
         )
