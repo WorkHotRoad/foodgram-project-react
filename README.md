@@ -15,6 +15,9 @@
 добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов,
 необходимых для приготовления одного или нескольких выбранных блюд.
 
+#### Пример развернутого проекта можно посмотреть [здесь](http://51.250.26.4/)
+
+
 ### Подготовка и запуск проекта
 - Склонировать репозиторий на локальную машину:
 ```
@@ -77,15 +80,43 @@ sudo docker-compose up -d --build
     sudo docker-compose exec backend python manage.py createsuperuser
     ```
     - Проект готов к использованию
+  ### http://<ваш хост>/admin/ под вашим логином администратора
+  ### http://<ваш хост>/
   
 ## Для запуска проекта на локальном сервере:
-- выполнить следующие команды:
-  1.установить вир.окруж.
-  2.установить requirements.txt
-  3. зайти в папку infra
-  4. команда сбоа docker-compose
-  5. зайти в контейнер web
-  6. выполнить миграции, сбор статики, загрузка данных, создание superuser
-  Проект готов к запуску на localhost
- 
-  
+
+  - Установить Docker, Docker-Compose на вашу локальную машину
+  - Установить вир.окружение
+  - Установить requirements.txt в виртуальном окружении
+  - В папке infra создать фаил .env
+  - Прописать в файле .env настройки для BD
+  ```
+  DB_ENGINE=<django.db.backends.postgresql>
+  DB_NAME=<имя для базы данных postgres>
+  DB_USER=<пользователь базы>
+  DB_PASSWORD=<пароль>
+  DB_HOST=<db>
+  DB_PORT=<5432>
+  SECRET_KEY=<секретный ключ проекта django> 
+  ```
+  - Собрать контейнеры
+   ```
+  docker-compose up -d --build
+   ```
+  - После успешного создания контейнеров открыть еще один терминал и войти в web контейнер :
+   ```
+    docker container ls
+    Cкопировать <CONTAINER ID> контейнера : workhotroad/my_foodgram:lates
+    docker exec -it <CONTAINER ID > bash
+   ```  
+  - Выполнить миграции, сбор статики, загрузка данных, создание superuser
+  ```
+  python manage.py makemigrations
+  python manage.py migrate
+  python manage.py collectstatic --noinput
+  python manage.py load_ingredients
+  python manage.py createsuperuser
+  ```
+  Проект готов к запуску
+  http://localhost/
+  http://localhost/admin
