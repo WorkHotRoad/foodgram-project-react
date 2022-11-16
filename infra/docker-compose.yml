@@ -8,14 +8,14 @@ services:
       - ./.env
   
   frontend:
-    image: workhotroad/front_for_my_foodgram
+    image: workhotroad/front_for_my_foodgram:lates
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
       - db
 
   web:
-    image: workhotroad/my_foodgram
+    image: workhotroad/my_foodgram:lates
     restart: always
     volumes:
       - static_value:/code/static/
