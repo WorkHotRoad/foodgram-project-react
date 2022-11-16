@@ -40,4 +40,4 @@ sudo chmod +x /usr/local/bin/docker-compose
 scp docker-compose.yml <username>@<host>:/home/<username>/
 scp nginx.conf <username>@<host>:/home/<username>/
 ```
-- На локальной машине создать .env файл в дериктории..
+- На сервере создать .env файл в дериктории..
