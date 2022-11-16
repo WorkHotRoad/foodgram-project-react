@@ -40,4 +40,52 @@ sudo chmod +x /usr/local/bin/docker-compose
 scp docker-compose.yml <username>@<host>:/home/<username>/
 scp nginx.conf <username>@<host>:/home/<username>/
 ```
-- На сервере создать .env файл в дериктории..
+- На сервере создать .env файл в дериктории: home/<username>/
+```
+sudo touch .env
+```
+- Прописать в файле .env настройки для BD
+```
+DB_ENGINE=<django.db.backends.postgresql>
+DB_NAME=<имя для базы данных postgres>
+DB_USER=<пользователь базы>
+DB_PASSWORD=<пароль>
+DB_HOST=<db>
+DB_PORT=<5432>
+SECRET_KEY=<секретный ключ проекта django>
+```
+-На сервере соберить docker-compose:
+```
+sudo docker-compose up -d --build
+```
+- На сервере Выполнить слудующие команды
+  
+    - Сбор статических файлов:
+    ```
+    sudo docker-compose exec backend python manage.py collectstatic --noinput
+    ```
+    - Применить миграции:
+    ```
+    sudo docker-compose exec backend python manage.py migrate --noinput
+    ```
+    - Загрузить ингридиенты в базу данных:
+    ```
+    sudo docker-compose exec backend python manage.py load_ingredients
+    ```
+    - Создать суперпользователя Django:
+    ```
+    sudo docker-compose exec backend python manage.py createsuperuser
+    ```
+    - Проект готов к использованию
+  
+## Для запуска проекта на локальном сервере:
+- выполнить следующие команды:
+  1.установить вир.окруж.
+  2.установить requirements.txt
+  3. зайти в папку infra
+  4. команда сбоа docker-compose
+  5. зайти в контейнер web
+  6. выполнить миграции, сбор статики, загрузка данных, создание superuser
+  Проект готов к запуску на localhost
+ 
+  
