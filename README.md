@@ -16,11 +16,10 @@
 необходимых для приготовления одного или нескольких выбранных блюд.
 
 #### Пример развернутого проекта можно посмотреть [здесь](http://51.250.26.4/)
-###админка:
 ```
--username: admin
--email: 1@1.ru
--password : adminadmin
+username: admin
+email: 1@1.ru
+password : adminadmin
 ```
 
 
