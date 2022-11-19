@@ -85,7 +85,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def validate_image(self, image):
         max_upload_size = 5242880
-        if image.size < max_upload_size:
+        if image.size > max_upload_size:
             raise serializers.ValidationError(
                 'Размер загружаемого файла не более 5мб'
             )
