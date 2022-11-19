@@ -85,7 +85,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         image = self.initial_data.get('image')
-        if image._size > 5*1024*1024:
+        if image._size > 5 * 1024 * 1024:
             raise serializers.ValidationError("Image file too large ( > 5mb )")
         ingredients = self.initial_data.get('ingredients')
         if not ingredients:
