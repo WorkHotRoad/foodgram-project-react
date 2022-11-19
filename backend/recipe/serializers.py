@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+import os.path
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -83,16 +84,14 @@ class RecipeSerializer(serializers.ModelSerializer):
             ).exists()
         return False
 
-    def validate_image(self, image):
+    def validate(self, data):
+        image = self.initial_data.get('image')
+        ingredients = self.initial_data.get('ingredients')
         max_upload_size = 5242880
-        if image.size > max_upload_size:
+        if os.path.getsize(image) > max_upload_size:
             raise serializers.ValidationError(
                 'Размер загружаемого файла не более 5мб'
             )
-        return image
-
-    def validate(self, data):
-        ingredients = self.initial_data.get('ingredients')
         if not ingredients:
             raise serializers.ValidationError({
                 'ingredients': 'Рецепт не может быть без ингредиентов'})
