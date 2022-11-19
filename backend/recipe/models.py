@@ -4,8 +4,6 @@ from django.db.models import Sum
 from prettytable import PrettyTable
 from users.models import User
 
-from .validators import validate_username
-
 CHOICES = (
     ('#000000', 'черный'),
     ('#808080', 'серый'),
@@ -90,7 +88,7 @@ class Recipe(models.Model):
     image = models.ImageField(
         upload_to='images_recipe',
         verbose_name="Картинка рецепта",
-        FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
+        FILE_UPLOAD_MAX_MEMORY_SIZE=5242880
     )
     ingredients = models.ManyToManyField(
         Ingredients,
