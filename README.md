@@ -123,4 +123,4 @@ sudo docker-compose up -d --build
   python manage.py createsuperuser
   ```
   Проект готов к запуску
-  http://localhost/
+  http://localhost/ 
