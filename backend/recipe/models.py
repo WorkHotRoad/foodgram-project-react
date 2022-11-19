@@ -90,7 +90,7 @@ class Recipe(models.Model):
     image = models.ImageField(
         upload_to='images_recipe',
         verbose_name="Картинка рецепта",
-        validators=[validate_username]
+        FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
     )
     ingredients = models.ManyToManyField(
         Ingredients,
