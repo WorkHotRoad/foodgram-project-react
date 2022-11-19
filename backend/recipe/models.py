@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import Sum
 from prettytable import PrettyTable
 from users.models import User
+
 from .validators import validate_username
 
 CHOICES = (
@@ -89,7 +90,7 @@ class Recipe(models.Model):
     image = models.ImageField(
         upload_to='images_recipe',
         verbose_name="Картинка рецепта",
-        validators = [validate_username]
+        validators=[validate_username]
     )
     ingredients = models.ManyToManyField(
         Ingredients,

@@ -1,5 +1,7 @@
-from django.core.exceptions import ValidationError
 import os.path
+
+from django.core.exceptions import ValidationError
+
 
 def validate_size(value):
     max_upload_size = 5242880
