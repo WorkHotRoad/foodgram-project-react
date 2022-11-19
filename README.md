@@ -124,4 +124,5 @@ sudo docker-compose up -d --build
   ```
   Проект готов к запуску
   http://localhost/
+  
   http://localhost/admin
