@@ -1,7 +1,6 @@
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import Sum
-
 from prettytable import PrettyTable
 from users.models import User
 

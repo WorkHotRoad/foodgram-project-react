@@ -1,6 +1,5 @@
 
 from django.shortcuts import get_object_or_404
-
 from djoser.serializers import UserCreateSerializer
 from drf_extra_fields.fields import Base64ImageField
 from recipe.models import Recipe
