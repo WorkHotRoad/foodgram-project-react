@@ -83,10 +83,15 @@ class RecipeSerializer(serializers.ModelSerializer):
             ).exists()
         return False
 
+    def validate_image(self, image):
+        max_upload_size = 5242880
+        if image.size < max_upload_size:
+            raise serializers.ValidationError(
+                'Размер загружаемого файла не более 5мб'
+            )
+        return image
+
     def validate(self, data):
-        image = self.initial_data.get('image')
-        if image._size > 5 * 1024 * 1024:
-            raise serializers.ValidationError("Image file too large ( > 5mb )")
         ingredients = self.initial_data.get('ingredients')
         if not ingredients:
             raise serializers.ValidationError({
@@ -113,7 +118,6 @@ class RecipeSerializer(serializers.ModelSerializer):
                     'Колличество нужно указывать только в цифрах'
                 )
         data['ingredients'] = ingredients
-        data['image'] = image
         return data
 
     def create_ingredients(self, ingredients, recipe):
