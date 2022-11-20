@@ -12,6 +12,7 @@ ALLOWED_HOSTS = ['*']
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
 
 INSTALLED_APPS = [
     'django.contrib.admin',
